@@ -1,13 +1,18 @@
 ```
-  ____        _       _                           _ _      _ 
- | __ ) _ __ (_)_ __ | |_   _   _ _ __ ___   __ _| (_) ___| |
- |  _ \| '_ \| | '_ \| __| | | | | '_ ` _ \ / _` | | |/ _ \ |
- | |_) | |_) | | | | | |_  | |_| | | | | | | (_| | | |  __/ |
- |____/| .__/|_|_| |_|\__|  \__,_|_| |_| |_|\__,_|_|_|\___|_|
-       |_|                                                   
-                    Wikidata CLI · by brAInwav
-```
+$ whoami
+brAInwav
 
+$ ./wikidata --help
+ _      _ _     _       _        ____ _     ___
+| |    (_) |   | |     | |      / ___| |   |_ _|
+| |    | | | __| | __ _| |_ ___| |   | |    | |
+| |    | | |/ _` |/ _` | __/ _ \ |___| |___ | |
+| |____| | | (_| | (_| | ||  __/\____|_____|___|
+|_____|_|_|\__,_|\__,_|\__\___|
+      wikidata cli · brAInwav
+
+$ _
+```
 
 [![npm](https://img.shields.io/npm/v/wikidata-cli?color=d97757)](https://www.npmjs.com/package/wikidata-cli)
 [![ci](https://github.com/jscraik/wikidata-CLI/actions/workflows/ci.yml/badge.svg)](https://github.com/jscraik/wikidata-CLI/actions/workflows/ci.yml)
