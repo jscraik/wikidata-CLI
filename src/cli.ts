@@ -13,6 +13,15 @@ const DEFAULT_API_URL = "https://www.wikidata.org/w/rest.php/wikibase/v1";
 const DEFAULT_ACTION_URL = "https://www.wikidata.org/w/api.php";
 const DEFAULT_SPARQL_URL = "https://query.wikidata.org/sparql";
 
+class CliError extends Error {
+  exitCode: number;
+
+  constructor(message: string, exitCode = 1) {
+    super(message);
+    this.exitCode = exitCode;
+  }
+}
+
 function resolveLogLevel(args: CliGlobals): "quiet" | "info" | "verbose" | "debug" {
   if (args.debug) return "debug";
   if (args.verbose) return "verbose";
@@ -22,14 +31,14 @@ function resolveLogLevel(args: CliGlobals): "quiet" | "info" | "verbose" | "debu
 
 function requireNetwork(args: CliGlobals): void {
   if (!args.network) {
-    throw new Error("Network access is disabled. Re-run with --network.");
+    throw new CliError("Network access is disabled. Re-run with --network.", 3);
   }
 }
 
 function requireUserAgent(args: CliGlobals): string {
   const ua = args.userAgent ?? process.env.WIKIDATA_USER_AGENT;
   if (!ua || ua.trim().length === 0) {
-    throw new Error("User-Agent is required. Provide --user-agent or WIKIDATA_USER_AGENT.");
+    throw new CliError("User-Agent is required. Provide --user-agent or WIKIDATA_USER_AGENT.", 3);
   }
   return ua;
 }
@@ -110,12 +119,19 @@ async function resolvePassphrase(noInput: boolean, confirm: boolean): Promise<st
   return passphrase;
 }
 
-yargs(hideBin(process.argv))
+const cli = yargs(hideBin(process.argv));
+
+cli
   .scriptName("wikidata")
+  .usage("wikidata [global flags] <subcommand> [args]")
+  .example("wikidata --network --user-agent \"MyApp/1.0 (https://example.org/contact)\" entity get Q42", "")
+  .example("wikidata --network sparql query --file ./query.rq --format json", "")
+  .example("wikidata --network action search --query \"New York\" --language en --limit 5", "")
+  .example("wikidata auth login --token-stdin < token.txt", "")
   .middleware((args: Arguments) => {
     if (args.help) return;
     if (args.json && args.plain) {
-      throw new Error("--json and --plain cannot be used together");
+      throw new CliError("--json and --plain cannot be used together", 2);
     }
   })
   .option("json", { type: "boolean", default: false, describe: "Output machine-readable JSON" })
@@ -127,6 +143,7 @@ yargs(hideBin(process.argv))
   .option("no-input", { type: "boolean", default: false, describe: "Disable prompts" })
   .option("network", { type: "boolean", default: false, describe: "Allow network access" })
   .option("auth", { type: "boolean", default: false, describe: "Use stored token for Authorization" })
+  .option("no-color", { type: "boolean", default: false, describe: "Disable color output" })
   .option("user-agent", { type: "string", describe: "User-Agent string for Wikimedia APIs" })
   .option("api-url", { type: "string", default: DEFAULT_API_URL, describe: "Wikidata REST API base URL" })
   .option("action-url", { type: "string", default: DEFAULT_ACTION_URL, describe: "Wikidata Action API URL" })
@@ -134,6 +151,23 @@ yargs(hideBin(process.argv))
   .option("timeout", { type: "number", default: 15000 })
   .option("retries", { type: "number", default: 2 })
   .option("retry-backoff", { type: "number", default: 400 })
+  .command(
+    "help [command]",
+    "Show help",
+    (y: Argv) =>
+      y.positional("command", {
+        type: "string",
+        describe: "Command to show help for (use <cmd> --help for details)"
+      }),
+    (args: Arguments) => {
+      const globals = args as unknown as CliGlobals & { command?: string };
+      const logger = createLogger(resolveLogLevel(globals));
+      if (globals.command) {
+        logger.info("Run `wikidata <command> --help` for command-specific help.");
+      }
+      cli.showHelp();
+    }
+  )
   .command(
     "auth <command>",
     "Manage local auth tokens",
@@ -328,11 +362,15 @@ yargs(hideBin(process.argv))
     }
   )
   .strict()
+  .recommendCommands()
   .demandCommand(1)
   .fail((msg, err, y) => {
     const message = err?.message ?? msg;
     if (message) process.stderr.write(`${message}\n`);
     (y as Argv).showHelp();
+    if (err instanceof CliError) {
+      process.exit(err.exitCode);
+    }
     process.exit(2);
   })
   .help()

@@ -1,6 +1,6 @@
 {
   "name": "wikidata-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Query Wikidata via REST, SPARQL, and Action API with safe, script-friendly output.",
   "type": "module",
   "bin": {
