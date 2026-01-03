@@ -1,72 +1,102 @@
-# wikidata-cli
+# brAInwav Wikidata CLI helps developers query Wikidata safely and quickly
 
-Safe, script-friendly Wikidata CLI for REST, SPARQL, and Action API queries.
+Safe, script-friendly CLI for Wikidata REST, SPARQL, and Action API queries. Read-only by default.
 
-## Install
+Last updated: 2026-01-03
 
-```bash
+## Table of contents
+- [Prerequisites](#prerequisites)
+- [Quickstart](#quickstart)
+- [Common tasks](#common-tasks)
+- [Troubleshooting](#troubleshooting)
+- [Reference](#reference)
+
+## Prerequisites
+- Required: Node.js 18+, npm, internet access, and a descriptive User-Agent string for Wikimedia APIs.
+- Optional: OAuth token for higher rate limits (still read-only).
+
+## Quickstart
+### 1) Install
+```sh
 npm install -g wikidata-cli
 ```
 
-## Quick start
-
-```bash
+### 2) Run a query
+```sh
 wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" entity get Q42
 ```
 
-## Commands
+### 3) Verify
+Expected output:
+- JSON for the entity, or a JSON envelope when using `--json`.
+- Exit code `0` on success.
 
-- `wikidata entity get <id>`
-- `wikidata entity statements <id>`
-- `wikidata sparql query --file <query.rq>`
-- `wikidata action search --query <text>`
-- `wikidata raw request <method> <path>`
-- `wikidata auth login|status|logout`
-- `wikidata doctor`
+## Common tasks
+### Get an entity and save it to a file
+- What you get: the entity JSON for a Q/P/L id.
+- Steps:
+```sh
+wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
+  entity get Q42 --output ./Q42.json
+```
+- Verify: `./Q42.json` contains the entity data.
 
-## Output modes
+### Run a SPARQL query from a file
+- What you get: SPARQL results in JSON/CSV/TSV.
+- Steps:
+```sh
+wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
+  sparql query --file ./query.rq --format json
+```
+- Verify: result set printed to stdout.
 
-- `--plain` (default): JSON pretty-printed or raw text.
-- `--json`: stable, versioned envelope for scripting.
+### Search via the Action API
+- What you get: entity search results by label.
+- Steps:
+```sh
+wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
+  action search --query "New York" --language en --limit 5
+```
+- Verify: results include matches with ids and labels.
 
-## Safety model
+### Use an encrypted token for requests
+- What you get: authenticated requests using `Authorization: Bearer ...`.
+- Steps:
+```sh
+cat token.txt | wikidata auth login --token-stdin
+wikidata --network --auth --user-agent "MyApp/1.0 (https://example.org/contact)" entity get Q42
+```
+- Verify: request succeeds; token is stored in `~/.config/wikidata-cli/credentials.json`.
 
-- Network calls require `--network`.
-- User-Agent is required for Wikimedia APIs.
-- `--auth` decrypts the stored token and adds `Authorization: Bearer ...`.
-- Secrets are never accepted via flags.
-
-## Help and UX
-
-- `wikidata --help` shows global help; use `wikidata <command> --help` for command help.
-- Use `--quiet` to suppress non-essential logs, `--verbose` for additional diagnostics.
-- `--no-color` or `NO_COLOR=1` disables colored output (currently output is plain by default).
-
-## Exit codes
-
-- `0` success
-- `1` generic failure
-- `2` invalid usage/validation
-- `3` policy refusal (missing `--network` or `--user-agent`)
-- `4` partial success
-- `130` user abort
-
-## Config
-
-- Config dir: `~/.config/wikidata-cli/`
-- Credentials stored in `credentials.json` encrypted with AES-256-GCM + scrypt.
-
-## SemVer
-
-This project follows semantic versioning.
-
-## Security checks
-
-```bash
-npm run semgrep
-npm run gitleaks
+## Troubleshooting
+### Symptom: "User-Agent is required"
+Cause: Wikimedia APIs require a descriptive User-Agent.
+Fix:
+```sh
+wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" entity get Q42
 ```
 
-## License
+### Symptom: "Network access is disabled"
+Cause: the CLI defaults to no network.
+Fix:
+```sh
+wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" entity get Q42
+```
 
-MIT
+### Symptom: 429 or rate-limit errors
+Cause: API throttling.
+Fix: retry after a short delay or lower request frequency.
+
+## Reference
+- Docs: `docs/GETTING_STARTED.md`, `docs/USAGE.md`, `docs/CONFIG.md`, `docs/TROUBLESHOOTING.md`.
+- Changelog: `CHANGELOG.md` (Keep a Changelog).
+- License: `LICENSE` (MIT).
+- Brand guidelines: `docs/BRAND.md`.
+- Commands:
+  - `wikidata entity get|statements <id>`
+  - `wikidata sparql query --file <query.rq>`
+  - `wikidata action search --query <text>`
+  - `wikidata raw request <method> <path>`
+  - `wikidata auth login|status|logout`
+  - `wikidata doctor`
+
