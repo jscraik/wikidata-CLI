@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [0.1.3] - 2026-01-03
+
+### Added
+- Contributing guide, CI workflows, and Dependabot config.
+- Security policy file, README badges, and FAQ.
+
 ## [0.1.2] - 2026-01-03
 
 ### Added
