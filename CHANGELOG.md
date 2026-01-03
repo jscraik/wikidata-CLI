@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and this project adheres to Semantic Versioning.
 
+## [0.1.2] - 2026-01-03
+
+### Added
+- Full public brAInwav documentation set and ASCII header.
+- Security contact email and brand documentation.
+
+### Changed
+- Updated README for public developer onboarding.
+
 ## [0.1.1] - 2026-01-03
 
 ### Added
