@@ -25,9 +25,9 @@ export type ConfigFile = {
 export function getConfigDir(): string {
   const xdg = process.env.XDG_CONFIG_HOME;
   if (xdg && xdg.trim().length > 0) {
-    return path.join(xdg, "wikidata-cli");
+    return path.join(xdg, "wiki-cli");
   }
-  return path.join(os.homedir(), ".config", "wikidata-cli");
+  return path.join(os.homedir(), ".config", "wiki-cli");
 }
 
 export function getConfigPath(): string {

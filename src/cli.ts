@@ -67,9 +67,9 @@ function requireNetwork(args: CliGlobals): void {
 }
 
 function resolveUserAgent(args: CliGlobals, required: boolean): string | undefined {
-  const ua = args.userAgent ?? process.env.WIKIDATA_USER_AGENT;
+  const ua = args.userAgent ?? process.env.WIKI_USER_AGENT;
   if (required && (!ua || ua.trim().length === 0)) {
-    throw new CliError("User-Agent is required. Provide --user-agent or WIKIDATA_USER_AGENT.", 3, "E_POLICY");
+    throw new CliError("User-Agent is required. Provide --user-agent or WIKI_USER_AGENT.", 3, "E_POLICY");
   }
   return ua?.trim();
 }
@@ -127,22 +127,22 @@ function loadConfigDefaults(): Partial<CliGlobals> {
 function loadEnvOverrides(): Partial<CliGlobals> {
   const overrides: Partial<CliGlobals> = {};
   const env = process.env;
-  if (env.WIKIDATA_USER_AGENT) overrides.userAgent = env.WIKIDATA_USER_AGENT;
-  if (env.WIKIDATA_API_URL) overrides.apiUrl = env.WIKIDATA_API_URL;
-  if (env.WIKIDATA_ACTION_URL) overrides.actionUrl = env.WIKIDATA_ACTION_URL;
-  if (env.WIKIDATA_SPARQL_URL) overrides.sparqlUrl = env.WIKIDATA_SPARQL_URL;
-  if (env.WIKIDATA_TIMEOUT) {
-    const value = Number(env.WIKIDATA_TIMEOUT);
+  if (env.WIKI_USER_AGENT) overrides.userAgent = env.WIKI_USER_AGENT;
+  if (env.WIKI_API_URL) overrides.apiUrl = env.WIKI_API_URL;
+  if (env.WIKI_ACTION_URL) overrides.actionUrl = env.WIKI_ACTION_URL;
+  if (env.WIKI_SPARQL_URL) overrides.sparqlUrl = env.WIKI_SPARQL_URL;
+  if (env.WIKI_TIMEOUT) {
+    const value = Number(env.WIKI_TIMEOUT);
     assertNumber("timeout", value, { min: 1, integer: true });
     overrides.timeout = value;
   }
-  if (env.WIKIDATA_RETRIES) {
-    const value = Number(env.WIKIDATA_RETRIES);
+  if (env.WIKI_RETRIES) {
+    const value = Number(env.WIKI_RETRIES);
     assertNumber("retries", value, { min: 0, integer: true });
     overrides.retries = value;
   }
-  if (env.WIKIDATA_RETRY_BACKOFF) {
-    const value = Number(env.WIKIDATA_RETRY_BACKOFF);
+  if (env.WIKI_RETRY_BACKOFF) {
+    const value = Number(env.WIKI_RETRY_BACKOFF);
     assertNumber("retry-backoff", value, { min: 0, integer: true });
     overrides.retryBackoff = value;
   }
@@ -208,7 +208,7 @@ function redactHeaders(headers: HeadersInit): Record<string, string> {
 }
 
 function outputRequestPreview(args: CliGlobals, summary: string, preview: RequestPreview): void {
-  outputResult(args, "wikidata.request.preview.v1", summary, preview);
+  outputResult(args, "wiki.request.preview.v1", summary, preview);
 }
 
 function parseRequestIdFromArgv(argv: string[]): string | undefined {
@@ -263,7 +263,7 @@ async function resolveAuthHeader(args: CliGlobals, mode: "preview" | "request"):
   if (!args.auth) return {};
   const stored = loadCredentials();
   if (!stored) {
-    throw new CliError("No stored token found. Run `wikidata auth login` first.", 3, "E_AUTH");
+    throw new CliError("No stored token found. Run `wiki auth login` first.", 3, "E_AUTH");
   }
   if (mode === "preview") {
     return { authorization: "Bearer <redacted>" };
@@ -316,19 +316,19 @@ async function resolveTokenInput(
 ): Promise<string> {
   if (tokenFile) return readFile(tokenFile).trim();
   if (tokenStdin) return (await readStdin()).trim();
-  const envName = tokenEnv ?? "WIKIDATA_TOKEN";
+  const envName = tokenEnv ?? "WIKI_TOKEN";
   const envToken = process.env[envName];
   if (envToken && envToken.trim().length > 0) return envToken.trim();
   if (process.stdin.isTTY) {
     if (noInput) {
       throw new Error(
-        "Token input required. Provide --token-file, --token-stdin, or --token-env (or set WIKIDATA_TOKEN)."
+        "Token input required. Provide --token-file, --token-stdin, or --token-env (or set WIKI_TOKEN)."
       );
     }
     return promptHidden("Paste OAuth token: ");
   }
   throw new Error(
-    "Token input required. Provide --token-file, --token-stdin, or --token-env (or set WIKIDATA_TOKEN)."
+    "Token input required. Provide --token-file, --token-stdin, or --token-env (or set WIKI_TOKEN)."
   );
 }
 
@@ -341,12 +341,12 @@ async function resolvePassphrase(options: {
 }): Promise<string> {
   if (options.passphraseFile) return readFile(options.passphraseFile).trim();
   if (options.passphraseStdin) return (await readStdin()).trim();
-  const envName = options.passphraseEnv ?? "WIKIDATA_PASSPHRASE";
+  const envName = options.passphraseEnv ?? "WIKI_PASSPHRASE";
   const envValue = process.env[envName];
   if (envValue && envValue.trim().length > 0) return envValue.trim();
   if (!process.stdin.isTTY) {
     throw new Error(
-      "Passphrase input required. Provide --passphrase-file, --passphrase-stdin, or --passphrase-env (or set WIKIDATA_PASSPHRASE)."
+      "Passphrase input required. Provide --passphrase-file, --passphrase-stdin, or --passphrase-env (or set WIKI_PASSPHRASE)."
     );
   }
   if (options.noInput) {
@@ -414,12 +414,12 @@ function parseOutputArgsFromArgv(argv: string[]): { json: boolean; plain: boolea
 }
 
 cli
-  .scriptName("wikidata")
-  .usage("wikidata [global flags] <subcommand> [args]")
-  .example("wikidata --network --user-agent \"MyApp/1.0 (https://example.org/contact)\" entity get Q42", "")
-  .example("wikidata --network sparql query --file ./query.rq --format json", "")
-  .example("wikidata --network action search --query \"New York\" --language en --limit 5", "")
-  .example("wikidata auth login --token-stdin < token.txt", "")
+  .scriptName("wiki")
+  .usage("wiki [global flags] <subcommand> [args]")
+  .example("wiki --network --user-agent \"MyApp/1.0 (https://example.org/contact)\" entity get Q42", "")
+  .example("wiki --network sparql query --file ./query.rq --format json", "")
+  .example("wiki --network action search --query \"New York\" --language en --limit 5", "")
+  .example("wiki auth login --token-stdin < token.txt", "")
   .config(mergedDefaults)
   .middleware((args: Arguments) => {
     lastKnownArgs = args as unknown as CliGlobals;
@@ -506,7 +506,7 @@ cli
                 value === null
                   ? `Config ${globals.key} not set`
                   : `Config ${globals.key} retrieved`;
-              outputResult(globals, "wikidata.config.get.v1", summary, { key: globals.key, value }, status);
+              outputResult(globals, "wiki.config.get.v1", summary, { key: globals.key, value }, status);
               return;
             }
             const outputValue = value === null ? "" : String(value);
@@ -544,7 +544,7 @@ cli
               typeof parsedValue === "undefined"
                 ? `Config ${globals.key} removed`
                 : `Config ${globals.key} updated`;
-            outputResult(globals, "wikidata.config.set.v1", summary, {
+            outputResult(globals, "wiki.config.set.v1", summary, {
               key: globals.key,
               value: typeof parsedValue === "undefined" ? null : parsedValue
             });
@@ -559,7 +559,7 @@ cli
             const pathValue = getConfigPath();
             const mode = resolveOutput(globals).mode;
             if (mode === "json") {
-              outputResult(globals, "wikidata.config.path.v1", "Config path", { path: pathValue });
+              outputResult(globals, "wiki.config.path.v1", "Config path", { path: pathValue });
               return;
             }
             writeOutput(`${pathValue}\n`, globals.output);
@@ -670,7 +670,7 @@ cli
               logger,
               globals
             );
-            outputResult(globals, "wikidata.entity.get.v1", `Fetched ${globals.id}`, data);
+            outputResult(globals, "wiki.entity.get.v1", `Fetched ${globals.id}`, data);
           }
         )
         .command(
@@ -703,7 +703,7 @@ cli
               logger,
               globals
             );
-            outputResult(globals, "wikidata.entity.statements.v1", `Fetched ${globals.id} statements`, data);
+            outputResult(globals, "wiki.entity.statements.v1", `Fetched ${globals.id} statements`, data);
           }
         )
         .demandCommand(1),
@@ -758,7 +758,7 @@ cli
         logger,
         globals
       );
-      outputResult(globals, "wikidata.sparql.query.v1", "SPARQL query executed", data);
+      outputResult(globals, "wiki.sparql.query.v1", "SPARQL query executed", data);
     }
   )
   .command(
@@ -807,7 +807,7 @@ cli
         logger,
         globals
       );
-      outputResult(globals, "wikidata.action.search.v1", "Action search executed", data);
+      outputResult(globals, "wiki.action.search.v1", "Action search executed", data);
     }
   )
   .command(
@@ -852,7 +852,7 @@ cli
         logger,
         globals
       );
-      outputResult(globals, "wikidata.raw.request.v1", "Raw request executed", data);
+      outputResult(globals, "wiki.raw.request.v1", "Raw request executed", data);
     }
   )
   .command(
@@ -862,7 +862,7 @@ cli
     (args: Arguments) => {
       const globals = args as unknown as CliGlobals;
       const logger = createLogger(resolveLogLevel(globals));
-      const ua = globals.userAgent ?? process.env.WIKIDATA_USER_AGENT;
+      const ua = globals.userAgent ?? process.env.WIKI_USER_AGENT;
       const hasToken = Boolean(loadCredentials());
       logger.info(`User-Agent configured: ${ua ? "yes" : "no"}`);
       logger.info(`Encrypted token present: ${hasToken ? "yes" : "no"}`);
@@ -885,7 +885,7 @@ cli
     const { mode, output, requestId } = resolveErrorContext();
 
     if (mode === "json") {
-      const payload = envelope("wikidata.error.v1", message, "error", null, [{ message, code }], requestId);
+      const payload = envelope("wiki.error.v1", message, "error", null, [{ message, code }], requestId);
       writeOutput(`${JSON.stringify(payload)}\n`, output);
       process.exit(exitCode);
     }

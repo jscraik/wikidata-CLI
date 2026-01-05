@@ -1,0 +1,6 @@
+extends: existence
+message: "Headings should start with a capital letter."
+level: warning
+scope: heading
+raw:
+  - '[A-Z].*'

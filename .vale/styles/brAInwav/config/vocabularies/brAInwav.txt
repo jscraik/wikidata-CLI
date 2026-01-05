@@ -1,0 +1,4 @@
+# brAInwav project vocabulary
+[general]
+accept = brAInwav,Wikidata,Wikibase,SPARQL,OAuth
+reject =

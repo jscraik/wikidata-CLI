@@ -1,0 +1,12 @@
+# brAInwav vocabulary
+# Project-specific terms and accepted spellings
+
+brAInwav
+Wikidata
+Wikibase
+SPARQL
+OAuth
+npm
+Node.js
+README
+changelog

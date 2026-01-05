@@ -36,7 +36,7 @@ describe("cli error handling", () => {
     expect(result.error).toBeUndefined();
     expect(result.status).toBe(3);
     const payload = JSON.parse(result.stdout.trim());
-    expect(payload.schema).toBe("wikidata.error.v1");
+    expect(payload.schema).toBe("wiki.error.v1");
     expect(payload.status).toBe("error");
     expect(payload.errors?.[0]?.code).toBe("E_POLICY");
   });
@@ -46,7 +46,7 @@ describe("cli error handling", () => {
     expect(result.error).toBeUndefined();
     expect(result.status).toBe(2);
     const payload = JSON.parse(result.stdout.trim());
-    expect(payload.schema).toBe("wikidata.error.v1");
+    expect(payload.schema).toBe("wiki.error.v1");
     expect(payload.status).toBe("error");
     expect(payload.errors?.[0]?.code).toBe("E_USAGE");
   });
@@ -58,7 +58,7 @@ describe("cli request preview", () => {
     expect(result.error).toBeUndefined();
     expect(result.status).toBe(0);
     const payload = JSON.parse(result.stdout.trim());
-    expect(payload.schema).toBe("wikidata.request.preview.v1");
+    expect(payload.schema).toBe("wiki.request.preview.v1");
     expect(payload.status).toBe("success");
     expect(payload.data.method).toBe("GET");
     expect(payload.data.url).toContain("/entities/items/Q42");
@@ -67,7 +67,7 @@ describe("cli request preview", () => {
 
 describe("cli config", () => {
   it("sets, gets, and resolves config values", () => {
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "wikidata-cli-"));
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "wiki-cli-"));
     const env = { XDG_CONFIG_HOME: tmpDir };
     const setResult = runCli(["config", "set", "user-agent", "TestApp/1.0"], { env });
     expect(setResult.error).toBeUndefined();
@@ -77,13 +77,13 @@ describe("cli config", () => {
     expect(getResult.error).toBeUndefined();
     expect(getResult.status).toBe(0);
     const payload = JSON.parse(getResult.stdout.trim());
-    expect(payload.schema).toBe("wikidata.config.get.v1");
+    expect(payload.schema).toBe("wiki.config.get.v1");
     expect(payload.data.value).toBe("TestApp/1.0");
 
     const pathResult = runCli(["--json", "config", "path"], { env });
     expect(pathResult.error).toBeUndefined();
     expect(pathResult.status).toBe(0);
     const pathPayload = JSON.parse(pathResult.stdout.trim());
-    expect(pathPayload.data.path).toContain(path.join(tmpDir, "wikidata-cli", "config.json"));
+    expect(pathPayload.data.path).toContain(path.join(tmpDir, "wiki-cli", "config.json"));
   });
 });

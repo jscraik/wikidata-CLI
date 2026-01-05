@@ -1,6 +1,24 @@
-# Contributing to brAInwav Wikidata CLI
+# Contributing to brAInwav wiKi CLI
 
 Thanks for contributing. This guide explains how to set up your dev environment, run checks, and keep changes consistent.
+
+Last updated: 2026-01-04
+
+## Table of contents
+- [Document requirements](#document-requirements)
+- [Prerequisites](#prerequisites)
+- [Local setup](#local-setup)
+- [Run checks](#run-checks)
+- [Code style expectations](#code-style-expectations)
+- [Commit and release](#commit-and-release)
+
+## Document requirements
+- Audience: contributors and maintainers.
+- Scope: local setup and contribution expectations.
+- Non-scope: CI configuration and release automation.
+- Owner: repository maintainers.
+- Review cadence: every release or at least quarterly.
+- Required approvals: maintainers for public changes.
 
 ## Prerequisites
 - Node.js 18+ and npm.
@@ -11,23 +29,33 @@ Thanks for contributing. This guide explains how to set up your dev environment,
 npm install
 ```
 
-## Run the test suite
+## Run checks
+### Test suite
 ```sh
 npm test
 ```
 
-## Type checking
+### Type checking
 ```sh
 npm run lint:types
 ```
 
-## Security scans
+### Security scans
 ```sh
 npm run semgrep
 npm run gitleaks
 ```
 
-## Build
+### Documentation checks
+```sh
+npm run lint:docs
+npm run lint:docs:vale
+npm run lint:docs:readability
+npm run lint:docs:brand
+```
+Note: run `vale sync` once to download the Microsoft style package.
+
+### Build
 ```sh
 npm run build
 ```

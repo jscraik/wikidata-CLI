@@ -51,7 +51,7 @@ export function envelope<T>(
   requestId?: string
 ): JsonEnvelope<T> {
   const meta = {
-    tool: "wikidata",
+    tool: "wiki",
     version: process.env.npm_package_version ?? "0.0.0",
     timestamp: new Date().toISOString(),
     ...(requestId !== undefined ? { request_id: requestId } : {})

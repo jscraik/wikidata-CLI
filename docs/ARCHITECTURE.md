@@ -1,51 +1,54 @@
 # Understand the brAInwav Wikidata CLI architecture
 
 This document gives a brief map of the codebase for contributors.
+It is a quick orientation. It is not a deep design spec.
 
-Last updated: 2026-01-03
+Last updated: 2026-01-04
 
 ## Table of contents
-- [Prerequisites](#prerequisites)
-- [Quickstart](#quickstart)
-- [Common tasks](#common-tasks)
+- [Document requirements](#document-requirements)
+- [Overview](#overview)
+- [Key modules](#key-modules)
+- [Common changes](#common-changes)
+- [Risks and assumptions](#risks-and-assumptions)
 - [Troubleshooting](#troubleshooting)
-- [Reference](#reference)
 
-## Prerequisites
-- Required: Node.js 18+.
+## Document requirements
+- Audience: contributors who need to navigate the codebase.
+- Scope: high-level module map and extension points.
+- Non-scope: detailed API docs or implementation walkthroughs.
+- Owner: repository maintainers.
+- Review cadence: every release or at least quarterly.
+- Required approvals: maintainers for public changes.
 
-## Quickstart
-### 1) Read the entry points
-- `src/cli.ts`: command routing, flags, and UX.
-- `src/wikidata.ts`: API calls for REST, Action API, and SPARQL.
+## Overview
+The CLI has a single entry point. It validates global flags, enforces safety checks, and routes subcommands to request handlers.
 
-### 2) Verify
-Expected outcome:
-- You can map a CLI command to its handler quickly.
+## Key modules
+- `src/cli.ts`: command routing, flags, output handling, and UX.
+- `src/wikidata.ts`: REST, Action API, and SPARQL calls.
+- `src/http.ts`: retry, timeout, and error translation.
+- `src/output.ts`: JSON envelope and plain output formatting.
+- `src/config.ts`: XDG config paths and persistence.
+- `src/crypto.ts`: AES-256-GCM credential encryption.
+- `src/io.ts`: stdin, file, and prompt helpers.
 
-## Common tasks
+## Common changes
 ### Add a new read-only command
-- What you get: a new subcommand wired into the CLI.
-- Steps:
-  1. Add a command handler in `src/cli.ts`.
-  2. Add any network calls in `src/wikidata.ts`.
-  3. Add tests in `tests/`.
-- Verify: `npm test` passes.
+- Add a command handler in `src/cli.ts`.
+- Add any network calls in `src/wikidata.ts`.
+- Add tests in `tests/`.
+- Verify `npm test` passes.
 
 ### Update output formatting
-- What you get: consistent plain/JSON output across commands.
-- Steps:
-  1. Update `src/output.ts`.
-  2. Verify `--json` output remains a single JSON object.
+- Update `src/output.ts`.
+- Verify `--json` output remains a single JSON object.
+
+## Risks and assumptions
+- All commands are read-only by design. New features must preserve that policy.
+- CLI safety defaults depend on the `--network` gate and User-Agent enforcement.
 
 ## Troubleshooting
 ### Symptom: command handler is hard to typecheck
 Cause: missing or incorrect yargs argument typing.
 Fix: ensure command handlers use `Arguments` and `Argv` types.
-
-## Reference
-- `src/cli.ts`: CLI surface and error handling.
-- `src/output.ts`: JSON envelope and output helpers.
-- `src/http.ts`: retry and timeout behavior.
-- `src/crypto.ts`: AES-256-GCM credential encryption.
-- `src/config.ts`: XDG config paths and persistence.

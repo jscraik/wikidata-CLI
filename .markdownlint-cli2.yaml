@@ -1,0 +1,11 @@
+globs:
+  - "**/*.md"
+  - "!node_modules/**"
+  - "!dist/**"
+  - "!.git/**"
+  - "!brand/**"
+  - "!.vale/**"
+  - "!references/BRAND_GUIDELINES.md"
+
+config:
+  extends: ".markdownlint.json"

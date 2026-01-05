@@ -1,15 +1,28 @@
-# Use the brAInwav Wikidata CLI to query Wikidata end to end
+# Use the brAInwav wiKi CLI to query Wikidata end to end
 
 This reference lists commands, flags, and examples for the public CLI.
 
 Last updated: 2026-01-04
 
 ## Table of contents
+- [Document requirements](#document-requirements)
 - [Prerequisites](#prerequisites)
 - [Quickstart](#quickstart)
 - [Common tasks](#common-tasks)
+- [Command reference](#command-reference)
+- [Global flags](#global-flags)
+- [Auth login options](#auth-login-options)
+- [Exit codes](#exit-codes)
+- [Risks and assumptions](#risks-and-assumptions)
 - [Troubleshooting](#troubleshooting)
-- [Reference](#reference)
+
+## Document requirements
+- Audience: developers using the CLI in scripts or pipelines.
+- Scope: CLI commands, flags, and output contracts.
+- Non-scope: Wikidata schema design or write operations.
+- Owner: repository maintainers.
+- Review cadence: every release or at least quarterly.
+- Required approvals: maintainers for public changes.
 
 ## Prerequisites
 - Required: Node.js 18+, npm, internet access, and a User-Agent string.
@@ -17,7 +30,7 @@ Last updated: 2026-01-04
 ## Quickstart
 ### 1) Run a basic query
 ```sh
-wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" entity get Q42
+wiki --network --user-agent "MyApp/1.0 (https://example.org/contact)" entity get Q42
 ```
 
 ### 2) Verify
@@ -29,7 +42,7 @@ Expected output:
 - What you get: the entity JSON for Q/P/L ids.
 - Steps:
 ```sh
-wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" entity get Q42
+wiki --network --user-agent "MyApp/1.0 (https://example.org/contact)" entity get Q42
 ```
 - Verify: output includes `id` and `labels`.
 
@@ -37,7 +50,7 @@ wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" entity
 - What you get: statements for the entity.
 - Steps:
 ```sh
-wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" entity statements Q42
+wiki --network --user-agent "MyApp/1.0 (https://example.org/contact)" entity statements Q42
 ```
 - Verify: output includes statement arrays.
 
@@ -45,7 +58,7 @@ wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" entity
 - What you get: query results in JSON/CSV/TSV.
 - Steps:
 ```sh
-wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
+wiki --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
   sparql query --file ./query.rq --format json
 ```
 - Verify: results include `head` and `results`.
@@ -54,7 +67,7 @@ wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
 - What you get: entity search results.
 - Steps:
 ```sh
-wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
+wiki --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
   action search --query "New York" --language en --limit 5
 ```
 - Verify: results include `id` and `label` fields.
@@ -63,7 +76,7 @@ wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
 - What you get: raw REST response for a path under the REST API base.
 - Steps:
 ```sh
-wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
+wiki --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
   raw request GET /entities/items/Q42
 ```
 - Verify: response contains the entity data.
@@ -72,68 +85,51 @@ wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
 - What you get: `Authorization: Bearer` header added.
 - Steps:
 ```sh
-cat token.txt | wikidata auth login --token-stdin
-wikidata --network --auth --user-agent "MyApp/1.0 (https://example.org/contact)" entity get Q42
+cat token.txt | wiki auth login --token-stdin
+wiki --network --auth --user-agent "MyApp/1.0 (https://example.org/contact)" entity get Q42
 ```
 - Non-interactive example:
 ```sh
-export WIKIDATA_TOKEN="your-token"
-export WIKIDATA_PASSPHRASE="your-passphrase"
-wikidata auth login
+export WIKI_TOKEN="your-token"
+export WIKI_PASSPHRASE="your-passphrase"
+wiki auth login
 ```
 - Custom env var names:
 ```sh
-export MY_WD_TOKEN="your-token"
-export MY_WD_PASSPHRASE="your-passphrase"
-wikidata auth login --token-env MY_WD_TOKEN --passphrase-env MY_WD_PASSPHRASE
+export MY_WIKI_TOKEN="your-token"
+export MY_WIKI_PASSPHRASE="your-passphrase"
+wiki auth login --token-env MY_WIKI_TOKEN --passphrase-env MY_WIKI_PASSPHRASE
 ```
 
 ### Set a default User-Agent
 - What you get: a persistent User-Agent without repeating flags.
 - Steps:
 ```sh
-wikidata config set user-agent "MyApp/1.0 (https://example.org/contact)"
+wiki config set user-agent "MyApp/1.0 (https://example.org/contact)"
 ```
-- Verify: `wikidata --network entity get Q42` works without `--user-agent`.
+- Verify:  `wiki --network entity get Q42` works without `--user-agent`.
 
 ### Preview a request without sending it
 - What you get: method, URL, headers (tokens redacted).
 - Steps:
 ```sh
-wikidata --print-request --user-agent "MyApp/1.0 (https://example.org/contact)" entity get Q42
+wiki --print-request --user-agent "MyApp/1.0 (https://example.org/contact)" entity get Q42
 ```
 - Verify: output contains a preview and no network call is made.
 
-## Troubleshooting
-### Symptom: "Path must start with '/'"
-Cause: raw requests require an absolute path.
-Fix:
-```sh
-wikidata --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
-  raw request GET /entities/items/Q42
-```
+## Command reference
+- `wiki help [command]`
+- `wiki entity get <id>`
+- `wiki entity statements <id>`
+- `wiki sparql query --file <query.rq> --format json|csv|tsv`
+- `wiki action search --query <text> [--language <lang>] [--limit <n>]`
+- `wiki raw request <method> <path> [--body-file <json>]`
+- `wiki auth login|status|logout`
+- `wiki config get|set|path`
+- `wiki doctor`
+- `wiki completion`
 
-### Symptom: "Passphrase input required"
-Cause: encrypted token storage needs a passphrase.
-Fix: provide `--passphrase-file`, `--passphrase-stdin`, or `--passphrase-env` (or set `WIKIDATA_PASSPHRASE`).
-
-### Symptom: "User-Agent is required"
-Cause: User-Agent is missing.
-Fix: add `--user-agent` or set `WIKIDATA_USER_AGENT`.
-
-## Reference
-### Command summary
-- `wikidata entity get <id>`
-- `wikidata entity statements <id>`
-- `wikidata sparql query --file <query.rq> --format json|csv|tsv`
-- `wikidata action search --query <text> [--language <lang>] [--limit <n>]`
-- `wikidata raw request <method> <path> [--body-file <json>]`
-- `wikidata auth login|status|logout`
-- `wikidata config get|set|path`
-- `wikidata doctor`
-- `wikidata completion`
-
-### Global flags
+## Global flags
 - `--network`: enable network access (required for any API call).
 - `--user-agent`: required for Wikimedia APIs.
 - `--auth`: use stored token for `Authorization: Bearer`.
@@ -152,10 +148,38 @@ Fix: add `--user-agent` or set `WIKIDATA_USER_AGENT`.
 - `--no-input`: disable prompts.
 - `--no-color`: disable color.
 
-### Exit codes
+## Auth login options
+- `--token-file <file>`: read token from file.
+- `--token-stdin`: read token from stdin.
+- `--token-env <name>`: read token from env var (name).
+
+## Exit codes
 - `0` success
 - `1` generic failure
 - `2` invalid usage/validation
 - `3` policy refusal (missing `--network` or `--user-agent`)
 - `4` partial success
 - `130` user abort
+
+## Risks and assumptions
+- Requests are read-only, but responses may still contain sensitive data.
+- `--print-request` skips network calls; data is not fetched in preview mode.
+- Raw requests require absolute paths and may expose more data than expected.
+- `--output` overwrites existing files.
+
+## Troubleshooting
+### Symptom: "Path must start with '/'"
+Cause: raw requests require an absolute path.
+Fix:
+```sh
+wiki --network --user-agent "MyApp/1.0 (https://example.org/contact)" \
+  raw request GET /entities/items/Q42
+```
+
+### Symptom: "Passphrase input required"
+Cause: encrypted token storage needs a passphrase.
+Fix: provide `--passphrase-file`, `--passphrase-stdin`, or `--passphrase-env` (or set `WIKI_PASSPHRASE`).
+
+### Symptom: "User-Agent is required"
+Cause: User-Agent is missing.
+Fix: add `--user-agent` or set `WIKI_USER_AGENT`.

@@ -1,15 +1,29 @@
 # Develop and release the brAInwav Wikidata CLI
 
 This guide explains how to build, test, scan, and release the CLI.
+It is for contributors and maintainers. It assumes local tooling.
+Run checks before you open a PR.
+Keep changes small. Keep tests green.
+Document user-facing changes as you go.
 
-Last updated: 2026-01-03
+Last updated: 2026-01-04
 
 ## Table of contents
+- [Document requirements](#document-requirements)
 - [Prerequisites](#prerequisites)
 - [Quickstart](#quickstart)
 - [Common tasks](#common-tasks)
+- [Risks and assumptions](#risks-and-assumptions)
 - [Troubleshooting](#troubleshooting)
 - [Reference](#reference)
+
+## Document requirements
+- Audience: contributors and maintainers.
+- Scope: local development, tests, scans, and release steps.
+- Non-scope: CI pipeline configuration or infrastructure provisioning.
+- Owner: repository maintainers.
+- Review cadence: every release or at least quarterly.
+- Required approvals: maintainers for release changes.
 
 ## Prerequisites
 - Required: Node.js 18+, npm.
@@ -56,6 +70,26 @@ npm run gitleaks
 ```
 - Verify: no findings.
 
+### Run documentation checks
+- What you get: markdown lint, prose lint, and readability scores.
+- Steps:
+```sh
+npm run lint:docs
+npm run lint:docs:vale
+npm run lint:docs:readability
+npm run lint:docs:brand
+```
+- Verify: no lint failures and readability scores are within the target range.
+Note: run `vale sync` once to download the Microsoft style package.
+
+### Run the CLI locally (dev)
+- What you get: execute the CLI without building.
+- Steps:
+```sh
+npm run dev -- --help
+```
+- Verify: help output is printed.
+
 ### Cut a release
 - What you get: a tagged release ready for npm publishing.
 - Steps:
@@ -67,6 +101,11 @@ npm version patch --no-git-tag-version
 # git push && git push --tags
 ```
 - Verify: tag exists in the remote repository.
+
+## Risks and assumptions
+- Security scans depend on local installations of semgrep and gitleaks.
+- Releasing requires appropriate git permissions and npm publishing rights.
+- `npm version` changes package metadata. Review the diff before tagging.
 
 ## Troubleshooting
 ### Symptom: npm audit fails on dev dependencies
